@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Task Tracker</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>Task Tracker</h1>
+          <p>Microservices Demo mit Kubernetes</p>
+        </div>
+        <button id="refreshButton" type="button">Aktualisieren</button>
+      </header>
+
+      <section class="panel">
+        <h2>Task erstellen</h2>
+        <form id="taskForm" class="form-grid">
+          <label>
+            Titel
+            <input id="titleInput" name="title" required maxlength="120" placeholder="Deployment testen">
+          </label>
+          <label>
+            User
+            <select id="userSelect" name="user_id"></select>
+          </label>
+          <label class="full-width">
+            Beschreibung
+            <textarea id="descriptionInput" name="description" rows="3" placeholder="Was soll erledigt werden?"></textarea>
+          </label>
+          <button type="submit">Task speichern</button>
+        </form>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel">
+          <h2>Tasks</h2>
+          <div id="taskList" class="task-list"></div>
+        </div>
+
+        <div class="panel">
+          <h2>User</h2>
+          <form id="userForm" class="stack">
+            <label>
+              Name
+              <input id="userNameInput" name="name" required maxlength="80" placeholder="Max Mustermann">
+            </label>
+            <button type="submit">User anlegen</button>
+          </form>
+          <div id="userList" class="user-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
+

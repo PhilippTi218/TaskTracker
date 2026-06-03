@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tasktracker
+      POSTGRES_USER: tasktracker
+      POSTGRES_PASSWORD: tasktracker
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tasktracker -d tasktracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  task-service:
+    build: ./task-service
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: tasktracker
+      DB_USER: tasktracker
+      DB_PASSWORD: tasktracker
+      PORT: "5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5001:5000"
+
+  user-service:
+    build: ./user-service
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: tasktracker
+      DB_USER: tasktracker
+      DB_PASSWORD: tasktracker
+      PORT: "5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5002:5000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - task-service
+      - user-service
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres_data:

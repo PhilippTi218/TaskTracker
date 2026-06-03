@@ -1,0 +1,180 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #eef2f7;
+  color: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.app-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.topbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.topbar p {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.panel h2 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+label {
+  color: #334155;
+  display: grid;
+  font-weight: 700;
+  gap: 6px;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.75rem;
+  width: 100%;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.task-list,
+.user-list {
+  display: grid;
+  gap: 12px;
+}
+
+.task-card {
+  align-items: flex-start;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+}
+
+.task-card h3 {
+  margin: 0 0 8px;
+}
+
+.task-card p {
+  color: #475569;
+  margin: 0 0 8px;
+}
+
+.task-card span {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.task-card.is-done {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.task-actions button:last-child {
+  background: #dc2626;
+}
+
+.task-actions button:last-child:hover {
+  background: #b91c1c;
+}
+
+.user-row,
+.empty {
+  background: #f8fafc;
+  border-radius: 6px;
+  color: #475569;
+  padding: 12px;
+}
+
+@media (max-width: 760px) {
+  .topbar,
+  .task-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .content-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
