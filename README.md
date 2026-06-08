@@ -113,7 +113,7 @@ http://localhost:8080
 
 - Person 1: `frontend`, `frontend.Dockerfile`, Kubernetes Ingress/Frontend-Service
 - Person 2: `task-service`, Task API, Task Deployment
-- Person 3: `user-service`, PostgreSQL, Secret, PVC
+- Philipp Tichy: `user-service`, PostgreSQL, Secret, PVC
 
 ## Kubernetes Themen im Projekt
 
