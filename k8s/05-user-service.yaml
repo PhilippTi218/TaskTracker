@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: user-service
   namespace: task-tracker
+  labels:
+    app.kubernetes.io/name: task-tracker
+    app.kubernetes.io/component: user-service
 spec:
   replicas: 1
   selector:
@@ -12,6 +15,8 @@ spec:
     metadata:
       labels:
         app: user-service
+        app.kubernetes.io/name: task-tracker
+        app.kubernetes.io/component: user-service
     spec:
       containers:
         - name: user-service
@@ -28,6 +33,13 @@ spec:
                 secretKeyRef:
                   name: db-secret
                   key: DB_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
           readinessProbe:
             httpGet:
               path: /health
@@ -46,10 +58,13 @@ kind: Service
 metadata:
   name: user-service
   namespace: task-tracker
+  labels:
+    app.kubernetes.io/name: task-tracker
+    app.kubernetes.io/component: user-service
 spec:
   selector:
     app: user-service
   ports:
-    - port: 5000
+    - name: http
+      port: 5000
       targetPort: 5000
-
