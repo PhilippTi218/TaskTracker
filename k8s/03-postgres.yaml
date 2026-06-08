@@ -3,6 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: postgres-data
   namespace: task-tracker
+  labels:
+    app.kubernetes.io/name: task-tracker
+    app.kubernetes.io/component: database
 spec:
   accessModes:
     - ReadWriteOnce
@@ -15,6 +18,9 @@ kind: Deployment
 metadata:
   name: postgres
   namespace: task-tracker
+  labels:
+    app.kubernetes.io/name: task-tracker
+    app.kubernetes.io/component: database
 spec:
   replicas: 1
   selector:
@@ -24,6 +30,8 @@ spec:
     metadata:
       labels:
         app: postgres
+        app.kubernetes.io/name: task-tracker
+        app.kubernetes.io/component: database
     spec:
       containers:
         - name: postgres
@@ -48,6 +56,29 @@ spec:
                 secretKeyRef:
                   name: db-secret
                   key: POSTGRES_PASSWORD
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
@@ -61,9 +92,13 @@ kind: Service
 metadata:
   name: postgres
   namespace: task-tracker
+  labels:
+    app.kubernetes.io/name: task-tracker
+    app.kubernetes.io/component: database
 spec:
   selector:
     app: postgres
   ports:
-    - port: 5432
+    - name: postgres
+      port: 5432
       targetPort: 5432

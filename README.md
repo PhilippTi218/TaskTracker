@@ -54,6 +54,24 @@ Manifeste anwenden:
 kubectl apply -f k8s/
 ```
 
+Nur die gemeinsame Basis fuer die Services anwenden:
+
+```bash
+kubectl apply -f k8s/00-namespace.yaml
+kubectl apply -f k8s/01-configmap.yaml
+kubectl apply -f k8s/02-secret.yaml
+kubectl apply -f k8s/03-postgres.yaml
+```
+
+PostgreSQL-Basis pruefen:
+
+```bash
+kubectl get pvc,pods,svc -n task-tracker
+kubectl wait --for=condition=ready pod -l app=postgres -n task-tracker --timeout=120s
+```
+
+Die Datenbank ist danach intern unter `postgres:5432` erreichbar.
+
 Status pruefen:
 
 ```bash
@@ -87,4 +105,3 @@ http://localhost:8080
 - Secret: Datenbankpasswort
 - PVC: persistente PostgreSQL-Daten
 - HPA: optionales Autoscaling fuer den Task-Service
-
