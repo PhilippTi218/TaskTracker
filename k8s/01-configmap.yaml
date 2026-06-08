@@ -3,10 +3,12 @@ kind: ConfigMap
 metadata:
   name: app-config
   namespace: task-tracker
+  labels:
+    app.kubernetes.io/name: task-tracker
+    app.kubernetes.io/component: config
 data:
   DB_HOST: postgres
   DB_PORT: "5432"
   DB_NAME: tasktracker
   DB_USER: tasktracker
   PORT: "5000"
-
