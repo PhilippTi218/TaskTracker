@@ -72,6 +72,25 @@ kubectl wait --for=condition=ready pod -l app=postgres -n task-tracker --timeout
 
 Die Datenbank ist danach intern unter `postgres:5432` erreichbar.
 
+User-Service Image bauen und in Kubernetes starten:
+
+```bash
+docker build -t task-tracker-user-service:latest ./user-service
+kubectl apply -f k8s/05-user-service.yaml
+kubectl wait --for=condition=ready pod -l app=user-service -n task-tracker --timeout=120s
+```
+
+User-Service lokal testen:
+
+```bash
+kubectl port-forward -n task-tracker svc/user-service 5002:5000
+curl http://localhost:5002/health
+curl http://localhost:5002/users
+curl -X POST http://localhost:5002/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User"}'
+```
+
 Status pruefen:
 
 ```bash
