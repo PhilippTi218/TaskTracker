@@ -50,7 +50,17 @@ def init_db():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "task-service"}
+    try:
+        with connect() as conn:
+            conn.execute("SELECT 1")
+    except psycopg.Error:
+        return {
+            "status": "error",
+            "service": "task-service",
+            "database": "unavailable",
+        }, 503
+
+    return {"status": "ok", "service": "task-service", "database": "ok"}
 
 
 @app.get("/tasks")
