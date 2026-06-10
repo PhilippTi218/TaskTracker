@@ -5,11 +5,30 @@ const userList = document.querySelector("#userList");
 const userSelect = document.querySelector("#userSelect");
 const refreshButton = document.querySelector("#refreshButton");
 const taskFilter = document.querySelector("#taskFilter");
+const userFilter = document.querySelector("#userFilter");
 
 let currentTaskFilter = "all";
+let currentUserFilter = "all";
 let allTasks = [];
 let allUsers = [];
 let isLoading = false;
+
+function buildTaskQuery() {
+  const params = new URLSearchParams();
+
+  if (currentTaskFilter === "open") {
+    params.set("done", "false");
+  } else if (currentTaskFilter === "done") {
+    params.set("done", "true");
+  }
+
+  if (currentUserFilter !== "all") {
+    params.set("user_id", currentUserFilter);
+  }
+
+  const query = params.toString();
+  return query ? `/api/tasks?${query}` : "/api/tasks";
+}
 
 async function request(path, options = {}) {
   const response = await fetch(path, {
@@ -81,18 +100,34 @@ function renderTasks(tasks, users) {
   }
 }
 
-function renderFilteredTasks() {
-  let filteredTasks = allTasks;
+function renderUserFilterOptions(users) {
+  const previous = currentUserFilter;
+  userFilter.innerHTML = '<option value="all">Alle User</option>';
 
-  if (currentTaskFilter === "open") {
-    filteredTasks = allTasks.filter(task => !task.done);
+  for (const user of users) {
+    const option = document.createElement("option");
+    option.value = user.id;
+    option.textContent = user.name;
+    userFilter.appendChild(option);
   }
 
-  if (currentTaskFilter === "done") {
-    filteredTasks = allTasks.filter(task => task.done);
-  }
+  // Auswahl beibehalten, solange der User noch existiert
+  const stillExists = users.some(user => String(user.id) === previous);
+  currentUserFilter = stillExists ? previous : "all";
+  userFilter.value = currentUserFilter;
+}
 
-  renderTasks(filteredTasks, allUsers);
+async function loadTasks() {
+  setLoading(true);
+
+  try {
+    allTasks = await request(buildTaskQuery());
+    renderTasks(allTasks, allUsers);
+  } catch (error) {
+    taskList.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
+  } finally {
+    setLoading(false);
+  }
 }
 
 function escapeHtml(value) {
@@ -108,6 +143,8 @@ function setLoading(loading) {
   isLoading = loading;
 
   refreshButton.disabled = loading;
+  taskFilter.disabled = loading;
+  userFilter.disabled = loading;
   taskForm.querySelector("button[type='submit']").disabled = loading;
   userForm.querySelector("button[type='submit']").disabled = loading;
 
@@ -131,14 +168,15 @@ async function loadData() {
   try {
     const [users, tasks] = await Promise.all([
       request("/api/users"),
-      request("/api/tasks"),
+      request(buildTaskQuery()),
     ]);
 
     allUsers = users;
     allTasks = tasks;
 
     renderUsers(allUsers);
-    renderFilteredTasks();
+    renderUserFilterOptions(allUsers);
+    renderTasks(allTasks, allUsers);
   } catch (error) {
     taskList.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
   } finally {
@@ -235,5 +273,10 @@ loadData().catch((error) => {
 
 taskFilter.addEventListener("change", () => {
   currentTaskFilter = taskFilter.value;
-  renderFilteredTasks();
+  loadTasks();
+});
+
+userFilter.addEventListener("change", () => {
+  currentUserFilter = userFilter.value;
+  loadTasks();
 });
