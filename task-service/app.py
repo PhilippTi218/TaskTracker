@@ -50,31 +50,88 @@ def init_db():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "task-service"}
+    try:
+        with connect() as conn:
+            conn.execute("SELECT 1")
+    except psycopg.Error:
+        return {
+            "status": "error",
+            "service": "task-service",
+            "database": "unavailable",
+        }, 503
+
+    return {"status": "ok", "service": "task-service", "database": "ok"}
 
 
 @app.get("/tasks")
 def list_tasks():
+    filters = []
+    values = []
+
+    if "done" in request.args:
+        raw = request.args["done"].strip().lower()
+        if raw in ("true", "1"):
+            filters.append("done = %s")
+            values.append(True)
+        elif raw in ("false", "0"):
+            filters.append("done = %s")
+            values.append(False)
+        else:
+            return {"error": "done must be true or false"}, 400
+
+    if "user_id" in request.args:
+        try:
+            user_id = int(request.args["user_id"])
+        except ValueError:
+            return {"error": "user_id must be a number"}, 400
+        filters.append("user_id = %s")
+        values.append(user_id)
+
+    where = f"WHERE {' AND '.join(filters)}" if filters else ""
+
     with connect() as conn:
         tasks = conn.execute(
-            """
+            f"""
             SELECT id, title, description, user_id, done, created_at
             FROM tasks
+            {where}
             ORDER BY id DESC
-            """
+            """,
+            values,
         ).fetchall()
     return jsonify(tasks)
+
+
+def validate_task_fields(payload, require_title):
+    if require_title or "title" in payload:
+        title = payload.get("title")
+        if not isinstance(title, str) or not title.strip():
+            return "title must be a non-empty string"
+
+    if "done" in payload and not isinstance(payload["done"], bool):
+        return "done must be true or false"
+
+    if "user_id" in payload:
+        user_id = payload["user_id"]
+        if user_id is not None and (
+            isinstance(user_id, bool) or not isinstance(user_id, int)
+        ):
+            return "user_id must be a number or null"
+
+    return None
 
 
 @app.post("/tasks")
 def create_task():
     payload = request.get_json(silent=True) or {}
-    title = (payload.get("title") or "").strip()
+
+    error = validate_task_fields(payload, require_title=True)
+    if error:
+        return {"error": error}, 400
+
+    title = payload["title"].strip()
     description = (payload.get("description") or "").strip()
     user_id = payload.get("user_id")
-
-    if not title:
-        return {"error": "title is required"}, 400
 
     with connect() as conn:
         task = conn.execute(
@@ -91,6 +148,11 @@ def create_task():
 @app.patch("/tasks/<int:task_id>")
 def update_task(task_id):
     payload = request.get_json(silent=True) or {}
+
+    error = validate_task_fields(payload, require_title=False)
+    if error:
+        return {"error": error}, 400
+
     allowed_fields = {
         "title": payload.get("title"),
         "description": payload.get("description"),
@@ -101,6 +163,9 @@ def update_task(task_id):
 
     if not updates:
         return {"error": "no supported fields provided"}, 400
+
+    if "title" in updates:
+        updates["title"] = updates["title"].strip()
 
     assignments = ", ".join(f"{field} = %s" for field in updates)
     values = list(updates.values()) + [task_id]

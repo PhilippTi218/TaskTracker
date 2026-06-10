@@ -72,9 +72,9 @@ function renderTasks(tasks, users) {
       </div>
       <div class="task-actions">
         <button type="button" data-action="toggle" data-id="${task.id}">
-          ${task.done ? "Oeffnen" : "Erledigt"}
+          ${task.done ? "Öffnen" : "Erledigt"}
         </button>
-        <button type="button" data-action="delete" data-id="${task.id}">Loeschen</button>
+        <button type="button" data-action="delete" data-id="${task.id}">Löschen</button>
       </div>
     `;
     taskList.appendChild(item);
