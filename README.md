@@ -23,12 +23,38 @@ http://localhost:8080
 
 API-Endpunkte:
 
-- `GET /api/tasks`
+- `GET /api/tasks` (optionale Filter, siehe unten)
 - `POST /api/tasks`
 - `PATCH /api/tasks/<id>`
 - `DELETE /api/tasks/<id>`
 - `GET /api/users`
 - `POST /api/users`
+
+### Task-Filter
+
+Die Task-Liste lässt sich über Query-Parameter filtern (einzeln oder kombiniert):
+
+- `GET /api/tasks?done=true` – nur erledigte Tasks (`done=false` für offene)
+- `GET /api/tasks?user_id=1` – nur Tasks eines bestimmten Users
+- `GET /api/tasks?user_id=1&done=true` – beide Filter kombiniert
+
+`done` akzeptiert `true`/`false` (auch `1`/`0`), `user_id` muss eine ganze Zahl sein. Ungültige
+Werte werden mit `400 Bad Request` abgelehnt. Ohne Parameter werden alle Tasks zurückgegeben.
+
+### Validierung
+
+Beim Anlegen (`POST`) und Ändern (`PATCH`) von Tasks gelten folgende Regeln (sonst `400`):
+
+- `title` darf nicht leer sein (auch bei `PATCH`, wenn er mitgeschickt wird)
+- `done` muss `true` oder `false` sein
+- `user_id` muss eine Zahl oder `null` sein
+
+### Healthcheck
+
+`GET /health` des Task-Service prüft nicht nur Flask, sondern auch die Datenbankverbindung
+(`SELECT 1`). Ist PostgreSQL erreichbar, kommt `200` mit `{"status":"ok","database":"ok"}`,
+andernfalls `503` mit `{"status":"error","database":"unavailable"}`. Dadurch erkennt Kubernetes
+über die Probes zuverlässiger, ob der Service wirklich arbeitsfähig ist.
 
 ## Kubernetes Start
 
