@@ -110,13 +110,6 @@ curl -X POST http://localhost:5001/tasks \
   -d '{"title":"Test Task","description":"erste Aufgabe"}'
 ```
 
-Optionales Autoscaling für den Task-Service aktivieren (benötigt den Metrics Server):
-
-```bash
-kubectl apply -f k8s/08-hpa.yaml
-kubectl get hpa -n task-tracker
-```
-
 Status prüfen:
 
 ```bash
@@ -135,10 +128,77 @@ Dann im Browser öffnen:
 http://localhost:8080
 ```
 
+## Autoscaling mit HPA (Horizontal Pod Autoscaler)
+
+Der Horizontal Pod Autoscaler (HPA) ist ein Kubernetes-Objekt, das die Anzahl der Pods
+eines Deployments automatisch an die aktuelle Last anpasst. Statt einen einzelnen Pod größer zu
+machen (vertikal), startet der HPA bei Bedarf weitere Kopien des Pods (horizontal) und entfernt sie
+wieder, wenn die Last sinkt. In diesem Projekt skaliert der HPA den `task-service`.
+
+Die Konfiguration liegt in `k8s/08-hpa.yaml`:
+
+```yaml
+spec:
+  scaleTargetRef:
+    name: task-service        # auf welches Deployment der HPA wirkt
+  minReplicas: 2              # nie weniger als 2 Pods
+  maxReplicas: 5              # nie mehr als 5 Pods
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70   # Zielwert: 70 % CPU-Auslastung
+```
+
+Bedeutung: Steigt die durchschnittliche CPU-Auslastung der `task-service`-Pods über 70 %,
+startet Kubernetes automatisch zusätzliche Pods (bis maximal 5). Sinkt die Auslastung wieder,
+werden überzählige Pods entfernt, bis wieder das Minimum von 2 erreicht ist.
+
+### Voraussetzung: Metrics Server
+
+Der HPA kann nur skalieren, wenn er die aktuelle CPU-Auslastung messen kann. Diese Messwerte
+liefert der Metrics Server. Ohne ihn wird der HPA zwar angelegt, zeigt bei den Metriken aber
+`<unknown>` und skaliert nie.
+
+Bei Minikube ist der Metrics Server als Addon verfügbar und mit einem Befehl aktiviert:
+
+```bash
+minikube addons enable metrics-server
+```
+
+### HPA anwenden und beobachten
+
+```bash
+kubectl apply -f k8s/08-hpa.yaml
+kubectl get hpa -n task-tracker -w
+```
+
+In der Spalte `TARGETS` sollte ein Wert wie `cpu: 1%/70%` stehen.
+Das `-w` (watch) verfolgt Änderungen live.
+
+### Autoscaling testen (optional)
+
+Um zu sehen, wie der HPA hochskaliert, kann man künstlich Last erzeugen. In einem Terminal den
+Service per Port-Forward erreichbar machen und Last gegen ihn fahren:
+
+```bash
+kubectl port-forward -n task-tracker svc/task-service 5001:5000
+# in einem zweiten Terminal:
+while true; do curl -s http://localhost:5001/tasks > /dev/null; done
+```
+
+Parallel in einem weiteren Terminal den HPA beobachten:
+
+```bash
+kubectl get hpa -n task-tracker -w
+```
+
 ## Projektaufteilung
 
-- Person 1: `frontend`, `frontend.Dockerfile`, Kubernetes Ingress/Frontend-Service
-- Person 2: `task-service`, Task API, Task Deployment
+- Edwin Caballero: `frontend`, `frontend.Dockerfile`, Kubernetes Ingress/Frontend-Service
+- Nadine Schmid: `task-service`, Task API, Task Deployment
 - Philipp Tichy: `user-service`, PostgreSQL, Secret, PVC
 
 ## Kubernetes Themen im Projekt
