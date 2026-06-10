@@ -46,7 +46,8 @@ function renderUsers(users) {
   }
 }
 
-function renderTasks(tasks) {
+function renderTasks(tasks, users) {
+  const usersById = new Map(users.map(user => [Number(user.id), user.name]));
   taskList.innerHTML = "";
 
   if (tasks.length === 0) {
@@ -61,7 +62,7 @@ function renderTasks(tasks) {
       <div>
         <h3>${escapeHtml(task.title)}</h3>
         <p>${escapeHtml(task.description || "Keine Beschreibung")}</p>
-        <span>User-ID: ${task.user_id || "nicht gesetzt"}</span>
+        <span>User: ${task.user_id ? escapeHtml(usersById.get(Number(task.user_id)) || "Unbekannt") : "nicht gesetzt"}</span>
       </div>
       <div class="task-actions">
         <button type="button" data-action="toggle" data-id="${task.id}">
@@ -89,7 +90,7 @@ async function loadData() {
     request("/api/tasks"),
   ]);
   renderUsers(users);
-  renderTasks(tasks);
+  renderTasks(tasks, users);
 }
 
 taskForm.addEventListener("submit", async (event) => {
