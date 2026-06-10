@@ -9,6 +9,7 @@ const taskFilter = document.querySelector("#taskFilter");
 let currentTaskFilter = "all";
 let allTasks = [];
 let allUsers = [];
+let isLoading = false;
 
 async function request(path, options = {}) {
   const response = await fetch(path, {
@@ -103,68 +104,130 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function setLoading(loading) {
+  isLoading = loading;
+
+  refreshButton.disabled = loading;
+  taskForm.querySelector("button[type='submit']").disabled = loading;
+  userForm.querySelector("button[type='submit']").disabled = loading;
+
+  taskList.querySelectorAll("button").forEach((button) => {
+    button.disabled = loading;
+  });
+
+  if (loading) {
+    refreshButton.textContent = "Lade...";
+  } else {
+    refreshButton.textContent = "Aktualisieren";
+  }
+}
+
 async function loadData() {
-  const [users, tasks] = await Promise.all([
-    request("/api/users"),
-    request("/api/tasks"),
-  ]);
+  setLoading(true);
 
-  allUsers = users;
-  allTasks = tasks;
+  taskList.innerHTML = '<p class="empty">Lade Tasks...</p>';
+  userList.innerHTML = '<p class="empty">Lade User...</p>';
 
-  renderUsers(allUsers);
-  renderFilteredTasks();
+  try {
+    const [users, tasks] = await Promise.all([
+      request("/api/users"),
+      request("/api/tasks"),
+    ]);
+
+    allUsers = users;
+    allTasks = tasks;
+
+    renderUsers(allUsers);
+    renderFilteredTasks();
+  } catch (error) {
+    taskList.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
+  } finally {
+    setLoading(false);
+  }
 }
 
 taskForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const formData = new FormData(taskForm);
-  await request("/api/tasks", {
-    method: "POST",
-    body: JSON.stringify({
-      title: formData.get("title"),
-      description: formData.get("description"),
-      user_id: formData.get("user_id") || null,
-    }),
-  });
-  taskForm.reset();
-  await loadData();
+
+  if (isLoading) return;
+
+  setLoading(true);
+
+  try {
+    const formData = new FormData(taskForm);
+
+    await request("/api/tasks", {
+      method: "POST",
+      body: JSON.stringify({
+        title: formData.get("title"),
+        description: formData.get("description"),
+        user_id: formData.get("user_id") || null,
+      }),
+    });
+
+    taskForm.reset();
+    await loadData();
+  } finally {
+    setLoading(false);
+  }
 });
 
 userForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const formData = new FormData(userForm);
-  await request("/api/users", {
-    method: "POST",
-    body: JSON.stringify({ name: formData.get("name") }),
-  });
-  userForm.reset();
-  await loadData();
+
+  if (isLoading) return;
+
+  setLoading(true);
+
+  try {
+    const formData = new FormData(userForm);
+
+    await request("/api/users", {
+      method: "POST",
+      body: JSON.stringify({ name: formData.get("name") }),
+    });
+
+    userForm.reset();
+    await loadData();
+  } finally {
+    setLoading(false);
+  }
 });
 
 taskList.addEventListener("click", async (event) => {
   const button = event.target.closest("button");
-  if (!button) return;
+  if (!button || isLoading) return;
 
-  const taskId = button.dataset.id;
-  const action = button.dataset.action;
+  setLoading(true);
 
-  if (action === "delete") {
-    await request(`/api/tasks/${taskId}`, { method: "DELETE" });
+  try {
+    const taskId = button.dataset.id;
+    const action = button.dataset.action;
+
+    if (action === "delete") {
+      await request(`/api/tasks/${taskId}`, { method: "DELETE" });
+    }
+
+    if (action === "toggle") {
+      const currentDone = button.closest(".task-card").classList.contains("is-done");
+
+      await request(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ done: !currentDone }),
+      });
+    }
+
+    await loadData();
+  } finally {
+    setLoading(false);
   }
-
-  if (action === "toggle") {
-    const currentDone = button.closest(".task-card").classList.contains("is-done");
-    await request(`/api/tasks/${taskId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ done: !currentDone }),
-    });
-  }
-
-  await loadData();
 });
 
-refreshButton.addEventListener("click", loadData);
+refreshButton.addEventListener("click", () => {
+  if (!isLoading) {
+    loadData();
+  }
+});
 
 loadData().catch((error) => {
   taskList.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
