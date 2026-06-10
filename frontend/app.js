@@ -4,6 +4,11 @@ const taskList = document.querySelector("#taskList");
 const userList = document.querySelector("#userList");
 const userSelect = document.querySelector("#userSelect");
 const refreshButton = document.querySelector("#refreshButton");
+const taskFilter = document.querySelector("#taskFilter");
+
+let currentTaskFilter = "all";
+let allTasks = [];
+let allUsers = [];
 
 async function request(path, options = {}) {
   const response = await fetch(path, {
@@ -75,6 +80,20 @@ function renderTasks(tasks, users) {
   }
 }
 
+function renderFilteredTasks() {
+  let filteredTasks = allTasks;
+
+  if (currentTaskFilter === "open") {
+    filteredTasks = allTasks.filter(task => !task.done);
+  }
+
+  if (currentTaskFilter === "done") {
+    filteredTasks = allTasks.filter(task => task.done);
+  }
+
+  renderTasks(filteredTasks, allUsers);
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -89,8 +108,12 @@ async function loadData() {
     request("/api/users"),
     request("/api/tasks"),
   ]);
-  renderUsers(users);
-  renderTasks(tasks, users);
+
+  allUsers = users;
+  allTasks = tasks;
+
+  renderUsers(allUsers);
+  renderFilteredTasks();
 }
 
 taskForm.addEventListener("submit", async (event) => {
@@ -147,3 +170,7 @@ loadData().catch((error) => {
   taskList.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
 });
 
+taskFilter.addEventListener("change", () => {
+  currentTaskFilter = taskFilter.value;
+  renderFilteredTasks();
+});

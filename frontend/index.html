@@ -36,10 +36,20 @@
       </section>
 
       <section class="content-grid">
-        <div class="panel">
-          <h2>Tasks</h2>
-          <div id="taskList" class="task-list"></div>
+      <div class="panel">
+        <h2>Tasks</h2>
+        
+        <div class="task-filter">
+          <label for="taskFilter">Filter</label>
+          <select id="taskFilter">
+            <option value="all">Alle Tasks</option>
+            <option value="open">Offene Tasks</option>
+            <option value="done">Erledigte Tasks</option>
+          </select>
         </div>
+
+        <div id="taskList" class="task-list"></div>
+      </div>
 
         <div class="panel">
           <h2>User</h2>

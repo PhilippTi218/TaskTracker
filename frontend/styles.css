@@ -107,7 +107,16 @@ textarea {
   grid-column: 1 / -1;
 }
 
-.task-list,
+.task-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.task-filter {
+  margin-bottom: 16px;
+}
+
 .user-list {
   display: grid;
   gap: 12px;
