@@ -55,13 +55,39 @@ def health():
 
 @app.get("/tasks")
 def list_tasks():
+    filters = []
+    values = []
+
+    if "done" in request.args:
+        raw = request.args["done"].strip().lower()
+        if raw in ("true", "1"):
+            filters.append("done = %s")
+            values.append(True)
+        elif raw in ("false", "0"):
+            filters.append("done = %s")
+            values.append(False)
+        else:
+            return {"error": "done must be true or false"}, 400
+
+    if "user_id" in request.args:
+        try:
+            user_id = int(request.args["user_id"])
+        except ValueError:
+            return {"error": "user_id must be a number"}, 400
+        filters.append("user_id = %s")
+        values.append(user_id)
+
+    where = f"WHERE {' AND '.join(filters)}" if filters else ""
+
     with connect() as conn:
         tasks = conn.execute(
-            """
+            f"""
             SELECT id, title, description, user_id, done, created_at
             FROM tasks
+            {where}
             ORDER BY id DESC
-            """
+            """,
+            values,
         ).fetchall()
     return jsonify(tasks)
 
