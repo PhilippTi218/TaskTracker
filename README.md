@@ -1,13 +1,13 @@
 # Task Tracker Microservices
 
-Mini-Projekt fuer eine einfache Task-Tracker-App mit drei Services und PostgreSQL.
+Mini-Projekt für eine einfache Task-Tracker-App mit drei Services und PostgreSQL.
 
 ## Architektur
 
-- `frontend`: Statische Weboberflaeche mit Nginx-Reverse-Proxy
-- `task-service`: Flask REST API fuer Tasks
-- `user-service`: Flask REST API fuer einfache User
-- `postgres`: Datenbank fuer Users und Tasks
+- `frontend`: Statische Weboberfläche mit Nginx-Reverse-Proxy
+- `task-service`: Flask REST API für Tasks
+- `user-service`: Flask REST API für einfache User
+- `postgres`: Datenbank für Users und Tasks
 
 ## Lokaler Start mit Docker Compose
 
@@ -54,7 +54,7 @@ Manifeste anwenden:
 kubectl apply -f k8s/
 ```
 
-Nur die gemeinsame Basis fuer die Services anwenden:
+Nur die gemeinsame Basis für die Services anwenden:
 
 ```bash
 kubectl apply -f k8s/00-namespace.yaml
@@ -63,7 +63,7 @@ kubectl apply -f k8s/02-secret.yaml
 kubectl apply -f k8s/03-postgres.yaml
 ```
 
-PostgreSQL-Basis pruefen:
+PostgreSQL-Basis prüfen:
 
 ```bash
 kubectl get pvc,pods,svc -n task-tracker
@@ -110,26 +110,26 @@ curl -X POST http://localhost:5001/tasks \
   -d '{"title":"Test Task","description":"erste Aufgabe"}'
 ```
 
-Optionales Autoscaling fuer den Task-Service aktivieren (benoetigt den Metrics Server):
+Optionales Autoscaling für den Task-Service aktivieren (benötigt den Metrics Server):
 
 ```bash
 kubectl apply -f k8s/08-hpa.yaml
 kubectl get hpa -n task-tracker
 ```
 
-Status pruefen:
+Status prüfen:
 
 ```bash
 kubectl get pods,svc,ingress -n task-tracker
 ```
 
-Wenn kein Ingress Controller aktiv ist, kann das Frontend per Port-Forward geoeffnet werden:
+Wenn kein Ingress Controller aktiv ist, kann das Frontend per Port-Forward geöffnet werden:
 
 ```bash
 kubectl port-forward -n task-tracker svc/frontend 8080:80
 ```
 
-Dann im Browser oeffnen:
+Dann im Browser öffnen:
 
 ```text
 http://localhost:8080
@@ -145,8 +145,8 @@ http://localhost:8080
 
 - Deployments: Frontend, Task-Service, User-Service, PostgreSQL
 - Services: interne Kommunikation zwischen Services
-- Ingress: Zugriff von aussen auf das Frontend
+- Ingress: Zugriff von außen auf das Frontend
 - ConfigMap: Datenbank- und App-Konfiguration
 - Secret: Datenbankpasswort
 - PVC: persistente PostgreSQL-Daten
-- HPA: optionales Autoscaling fuer den Task-Service
+- HPA: optionales Autoscaling für den Task-Service
