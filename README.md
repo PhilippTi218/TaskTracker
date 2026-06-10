@@ -91,6 +91,32 @@ curl -X POST http://localhost:5002/users \
   -d '{"name":"Test User"}'
 ```
 
+Task-Service Image bauen und in Kubernetes starten:
+
+```bash
+docker build -t task-tracker-task-service:latest ./task-service
+kubectl apply -f k8s/04-task-service.yaml
+kubectl wait --for=condition=ready pod -l app=task-service -n task-tracker --timeout=120s
+```
+
+Task-Service lokal testen:
+
+```bash
+kubectl port-forward -n task-tracker svc/task-service 5001:5000
+curl http://localhost:5001/health
+curl http://localhost:5001/tasks
+curl -X POST http://localhost:5001/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test Task","description":"erste Aufgabe"}'
+```
+
+Optionales Autoscaling fuer den Task-Service aktivieren (benoetigt den Metrics Server):
+
+```bash
+kubectl apply -f k8s/08-hpa.yaml
+kubectl get hpa -n task-tracker
+```
+
 Status pruefen:
 
 ```bash
