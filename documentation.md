@@ -2,6 +2,8 @@
 
 GitHub Repository: <https://github.com/PhilippTi218/TaskTracker>
 
+Stand: 11. Juni 2026
+
 ## 1. Projektüberblick
 
 Der Task Tracker ist eine einfache Microservices-Anwendung zur Verwaltung von Aufgaben und
@@ -162,5 +164,4 @@ Aktueller Teststand:
 Das Projekt demonstriert eine kleine, aber vollständige Microservices-Anwendung mit Docker,
 Kubernetes und PostgreSQL. Neben der lokalen Ausführung mit Docker Compose enthält es Kubernetes-
 Manifeste für Betrieb, Konfiguration, persistente Datenhaltung und optionales Autoscaling.
-Durch Healthchecks, Eingabevalidierung und automatisierte Tests ist die Anwendung für eine
-Abgabe oder Demonstration gut nachvollziehbar und überprüfbar.
+Durch Healthchecks, Eingabevalidierung und automatisierte Tests ist die Anwendung für eine Demonstration gut nachvollziehbar und überprüfbar.
