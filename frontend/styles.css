@@ -107,7 +107,16 @@ textarea {
   grid-column: 1 / -1;
 }
 
-.task-list,
+.task-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.task-filter {
+  margin-bottom: 16px;
+}
+
 .user-list {
   display: grid;
   gap: 12px;
@@ -178,3 +187,16 @@ textarea {
   }
 }
 
+button:disabled {
+  background: #9ca3af;
+  color: #f3f4f6;
+  cursor: not-allowed;
+  opacity: 0.65;
+  box-shadow: none;
+  transform: none;
+}
+
+button:disabled:hover {
+  background: #9ca3af;
+  transform: none;
+}
