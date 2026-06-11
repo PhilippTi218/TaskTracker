@@ -22,14 +22,24 @@ Die Anwendung ist in vier zentrale Komponenten aufgeteilt:
 
 - `frontend`: Statische Weboberfläche, ausgeliefert über Nginx. Nginx dient zusätzlich als
   Reverse Proxy für die Backend-APIs.
-- `task-service`: Flask REST API für Tasks. Der Service verwaltet Titel, Beschreibung, User-Zuordnung
-  und Erledigt-Status.
+- `task-service`: Flask REST API für Tasks. Der Service verwaltet Titel, Beschreibung,
+  User-Zuordnung und Erledigt-Status. Im Container wird der Service mit Gunicorn gestartet.
 - `user-service`: Flask REST API für User. Der Service verwaltet Usernamen und validiert Eingaben.
+  Im Container wird der Service mit Gunicorn gestartet.
 - `postgres`: Gemeinsame PostgreSQL-Datenbank für Tasks und User.
 
 Die Kommunikation läuft im lokalen Docker-Compose-Setup über interne Servicenamen. Das Frontend
 ist über `http://localhost:8080` erreichbar und leitet API-Anfragen an die jeweiligen Backend-
 Services weiter.
+
+Die Flask-Backends laufen in den Docker-Containern nicht über den Flask Development Server,
+sondern über Gunicorn:
+
+```bash
+gunicorn -b 0.0.0.0:5000 app:app
+```
+
+Vor dem Start wird jeweils die Datenbankinitialisierung ausgeführt.
 
 ## 4. Lokaler Start
 

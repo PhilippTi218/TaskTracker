@@ -5,8 +5,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py .
+COPY *.py .
 
 EXPOSE 5000
-CMD ["python", "app.py"]
-
+CMD ["sh", "-c", "python init_db.py && gunicorn -b 0.0.0.0:5000 app:app"]

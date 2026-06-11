@@ -5,8 +5,8 @@ Mini-Projekt für eine einfache Task-Tracker-App mit drei Services und PostgreSQ
 ## Architektur
 
 - `frontend`: Statische Weboberfläche mit Nginx-Reverse-Proxy
-- `task-service`: Flask REST API für Tasks
-- `user-service`: Flask REST API für einfache User
+- `task-service`: Flask REST API für Tasks, im Container gestartet mit Gunicorn
+- `user-service`: Flask REST API für einfache User, im Container gestartet mit Gunicorn
 - `postgres`: Datenbank für Users und Tasks
 
 ## Lokaler Start mit Docker Compose
@@ -39,6 +39,17 @@ PostgreSQL-Instanz nötig ist.
 pip install -r requirements-dev.txt
 python -m pytest
 ```
+
+## Container-Start der Backends
+
+Die Flask-Backends werden in den Docker-Images nicht mit dem Flask Development Server gestartet,
+sondern über Gunicorn:
+
+```bash
+gunicorn -b 0.0.0.0:5000 app:app
+```
+
+Vor dem Start führt der Container jeweils die Datenbankinitialisierung aus.
 
 ### Task-Filter
 
