@@ -10,6 +10,8 @@ from psycopg.rows import dict_row
 app = Flask(__name__)
 CORS(app)
 
+MAX_USER_NAME_LENGTH = 80
+
 
 def db_config():
     return {
@@ -33,9 +35,15 @@ def init_db():
                     """
                     CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY,
-                        name TEXT NOT NULL,
+                        name TEXT NOT NULL UNIQUE,
                         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                     )
+                    """
+                )
+                conn.execute(
+                    """
+                    CREATE UNIQUE INDEX IF NOT EXISTS users_name_unique
+                    ON users (name)
                     """
                 )
                 conn.execute(
@@ -67,6 +75,20 @@ def health():
     return {"status": "ok", "service": "user-service", "database": "ok"}
 
 
+def validate_user_name(value):
+    if not isinstance(value, str):
+        return None, "name must be a string"
+
+    name = value.strip()
+    if not name:
+        return None, "name is required"
+
+    if len(name) > MAX_USER_NAME_LENGTH:
+        return None, f"name must be at most {MAX_USER_NAME_LENGTH} characters"
+
+    return name, None
+
+
 @app.get("/users")
 def list_users():
     with connect() as conn:
@@ -79,20 +101,24 @@ def list_users():
 @app.post("/users")
 def create_user():
     payload = request.get_json(silent=True) or {}
-    name = (payload.get("name") or "").strip()
+    name, error = validate_user_name(payload.get("name"))
 
-    if not name:
-        return {"error": "name is required"}, 400
+    if error:
+        return {"error": error}, 400
 
-    with connect() as conn:
-        user = conn.execute(
-            """
-            INSERT INTO users (name)
-            VALUES (%s)
-            RETURNING id, name, created_at
-            """,
-            (name,),
-        ).fetchone()
+    try:
+        with connect() as conn:
+            user = conn.execute(
+                """
+                INSERT INTO users (name)
+                VALUES (%s)
+                RETURNING id, name, created_at
+                """,
+                (name,),
+            ).fetchone()
+    except psycopg.errors.UniqueViolation:
+        return {"error": "name already exists"}, 409
+
     return jsonify(user), 201
 
 
