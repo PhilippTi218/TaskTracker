@@ -30,6 +30,16 @@ API-Endpunkte:
 - `GET /api/users`
 - `POST /api/users`
 
+## Tests
+
+Backend-Tests laufen mit `pytest` und mocken die Datenbankverbindung, sodass keine laufende
+PostgreSQL-Instanz nötig ist.
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
 ### Task-Filter
 
 Die Task-Liste lässt sich über Query-Parameter filtern (einzeln oder kombiniert):
