@@ -59,12 +59,13 @@ Beim Anlegen (`POST`) und Ändern (`PATCH`) von Tasks gelten folgende Regeln (so
 - `done` muss `true` oder `false` sein
 - `user_id` muss eine Zahl oder `null` sein
 
-### Healthcheck
+### Healthchecks
 
-`GET /health` des Task-Service prüft nicht nur Flask, sondern auch die Datenbankverbindung
-(`SELECT 1`). Ist PostgreSQL erreichbar, kommt `200` mit `{"status":"ok","database":"ok"}`,
-andernfalls `503` mit `{"status":"error","database":"unavailable"}`. Dadurch erkennt Kubernetes
-über die Probes zuverlässiger, ob der Service wirklich arbeitsfähig ist.
+`GET /health` des Task-Service und des User-Service prüft nicht nur Flask, sondern auch die
+Datenbankverbindung (`SELECT 1`). Ist PostgreSQL erreichbar, kommt `200` mit
+`{"status":"ok","database":"ok"}`, andernfalls `503` mit
+`{"status":"error","database":"unavailable"}`. Dadurch erkennt Kubernetes über die Probes
+zuverlässiger, ob die Services wirklich arbeitsfähig sind.
 
 ## Kubernetes Start
 
@@ -233,13 +234,14 @@ kubectl get hpa -n task-tracker -w
 
 ## Projektaufteilung
 
-- Edwin Caballero: `frontend`, `frontend.Dockerfile`, Kubernetes Ingress/Frontend-Service
+- Edwin Caballero: `frontend`, `frontend/Dockerfile`, Kubernetes Ingress/Frontend-Service
 - Nadine Schmid: `task-service`, Task API, Task Deployment
-- Philipp Tichy: `user-service`, PostgreSQL, Secret, PVC
+- Philipp Tichy: `user-service`, PostgreSQL-StatefulSet, Secret, PVC
 
 ## Kubernetes Themen im Projekt
 
-- Deployments: Frontend, Task-Service, User-Service, PostgreSQL
+- Deployments: Frontend, Task-Service, User-Service
+- StatefulSet: PostgreSQL mit persistenter Datenhaltung
 - Services: interne Kommunikation zwischen Services
 - Ingress: Zugriff von außen auf das Frontend
 - ConfigMap: Datenbank- und App-Konfiguration
