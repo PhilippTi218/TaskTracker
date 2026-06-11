@@ -1,63 +1,15 @@
 import os
-import time
 
 import psycopg
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from psycopg.rows import dict_row
+
+from database import connect
+from settings import MAX_USER_NAME_LENGTH
 
 
 app = Flask(__name__)
 CORS(app)
-
-MAX_USER_NAME_LENGTH = 80
-
-
-def db_config():
-    return {
-        "host": os.getenv("DB_HOST", "localhost"),
-        "port": int(os.getenv("DB_PORT", "5432")),
-        "dbname": os.getenv("DB_NAME", "tasktracker"),
-        "user": os.getenv("DB_USER", "tasktracker"),
-        "password": os.getenv("DB_PASSWORD", "tasktracker"),
-    }
-
-
-def connect():
-    return psycopg.connect(**db_config(), row_factory=dict_row)
-
-
-def init_db():
-    for attempt in range(1, 11):
-        try:
-            with connect() as conn:
-                conn.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS users (
-                        id SERIAL PRIMARY KEY,
-                        name TEXT NOT NULL UNIQUE,
-                        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                    )
-                    """
-                )
-                conn.execute(
-                    """
-                    CREATE UNIQUE INDEX IF NOT EXISTS users_name_unique
-                    ON users (name)
-                    """
-                )
-                conn.execute(
-                    """
-                    INSERT INTO users (name)
-                    SELECT 'Demo User'
-                    WHERE NOT EXISTS (SELECT 1 FROM users)
-                    """
-                )
-            return
-        except psycopg.OperationalError:
-            if attempt == 10:
-                raise
-            time.sleep(2)
 
 
 @app.get("/health")
@@ -123,5 +75,4 @@ def create_user():
 
 
 if __name__ == "__main__":
-    init_db()
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")))
