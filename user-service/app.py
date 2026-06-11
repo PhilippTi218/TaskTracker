@@ -54,7 +54,17 @@ def init_db():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "user-service"}
+    try:
+        with connect() as conn:
+            conn.execute("SELECT 1")
+    except psycopg.Error:
+        return {
+            "status": "error",
+            "service": "user-service",
+            "database": "unavailable",
+        }, 503
+
+    return {"status": "ok", "service": "user-service", "database": "ok"}
 
 
 @app.get("/users")
@@ -89,4 +99,3 @@ def create_user():
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")))
-
