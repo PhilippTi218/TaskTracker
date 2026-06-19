@@ -77,6 +77,12 @@ Check the pods:
 kubectl get pods -n task-tracker
 ```
 
+Check the services:
+
+```bash
+kubectl get svc -n task-tracker
+```
+
 Access the services locally:
 
 ```bash
@@ -109,6 +115,27 @@ To keep the dashboard simple, the Kubernetes dashboard monitors only the most me
 - pod restarts
 - HPA current replicas
 - HPA desired replicas
+
+This is intentionally not a full Kubernetes operations dashboard. The goal is to show the most important architectural idea: the system is observable at both application level and Kubernetes deployment level.
+
+---
+
+## Kubernetes restart pods
+
+To keep the dashboard simple, the Kubernetes dashboard monitors only the most meaningful runtime metrics:
+
+```bash
+kubectl rollout restart deployment/frontend -n task-tracker
+kubectl port-forward -n task-tracker svc/frontend 8080:80
+```
+```bash
+kubectl rollout restart deployment/prometheus -n task-tracker
+kubectl port-forward -n task-tracker svc/prometheus 9090:9090
+```
+```bash
+kubectl rollout restart deployment/grafana -n task-tracker
+kubectl port-forward -n task-tracker svc/grafana 3000:3000
+```
 
 This is intentionally not a full Kubernetes operations dashboard. The goal is to show the most important architectural idea: the system is observable at both application level and Kubernetes deployment level.
 
