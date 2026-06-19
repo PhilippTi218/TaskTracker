@@ -109,17 +109,33 @@ data:
         },
         {
           "type": "timeseries",
-          "title": "Average Response Time",
+          "title": "Average Response Time by Service",
           "gridPos": {
             "x": 0,
             "y": 8,
             "w": 12,
             "h": 8
           },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
           "targets": [
             {
-              "expr": "rate(flask_http_request_duration_seconds_sum[1m]) / rate(flask_http_request_duration_seconds_count[1m])",
-              "legendFormat": "avg response time",
+              "expr": "(sum by (job) (rate(flask_http_request_duration_seconds_sum[1m])) / sum by (job) (rate(flask_http_request_duration_seconds_count[1m]))) * 1000",
+              "legendFormat": "{{job}}",
               "refId": "A"
             }
           ]

@@ -28,11 +28,11 @@
     },
     {
       "datasource": {"type": "prometheus", "uid": "Prometheus"},
-      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
       "id": 3,
       "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single", "sort": "none"}},
-      "targets": [{"expr": "sum by (job) (rate(flask_http_request_duration_seconds_sum[1m])) / sum by (job) (rate(flask_http_request_duration_seconds_count[1m]))", "legendFormat": "{{job}}", "refId": "A"}],
+      "targets": [{"expr": "(sum by (job) (rate(flask_http_request_duration_seconds_sum[1m])) / sum by (job) (rate(flask_http_request_duration_seconds_count[1m]))) * 1000", "legendFormat": "{{job}}", "refId": "A"}],
       "title": "Average response time by service",
       "type": "timeseries"
     },
