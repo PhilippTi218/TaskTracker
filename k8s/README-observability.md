@@ -1,31 +1,50 @@
-# TaskTracker Kubernetes Observability
+# Kubernetes Observability
 
-This Kubernetes extension runs Prometheus and Grafana inside the `task-tracker` namespace.
+This Kubernetes deployment includes Prometheus, Grafana, and kube-state-metrics.
 
-Prometheus scrapes:
+## Components
 
-- `task-service:5000/metrics`
-- `user-service:5000/metrics`
+- `task-service` exposes application metrics at `/metrics`
+- `user-service` exposes application metrics at `/metrics`
+- `prometheus` scrapes the backend services and kube-state-metrics
+- `grafana` visualizes application and Kubernetes metrics
+- `kube-state-metrics` exposes Kubernetes object state such as pods and HPA
 
-Grafana is preconfigured with:
+## Simple dashboard scope
 
-- Prometheus datasource
-- TaskTracker Observability dashboard
+The Grafana dashboard intentionally focuses only on the most meaningful metrics:
 
-## Apply
+### Application metrics
+
+- services up
+- request rate
+- error rate
+- average response time
+- task counters
+- user counters
+
+### Kubernetes metrics
+
+- pod status
+- pod restarts
+- HPA current replicas
+- HPA desired replicas
+
+## Run
 
 ```bash
+minikube start
+minikube addons enable metrics-server
+eval $(minikube docker-env)
+
+docker build -t tasktracker-task-service:latest ./task-service
+docker build -t tasktracker-user-service:latest ./user-service
+docker build -t tasktracker-frontend:latest ./frontend
+
 kubectl apply -f k8s/
 ```
 
-## Check pods
-
-```bash
-kubectl get pods -n task-tracker
-kubectl get svc -n task-tracker
-```
-
-## Port forward
+## Access
 
 ```bash
 kubectl port-forward -n task-tracker svc/frontend 8080:80
@@ -33,26 +52,13 @@ kubectl port-forward -n task-tracker svc/prometheus 9090:9090
 kubectl port-forward -n task-tracker svc/grafana 3000:3000
 ```
 
-Open:
+Grafana:
 
-- Frontend: http://localhost:8080
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000
-
-Grafana login:
-
-- username: `admin`
-- password: `admin`
-
-Dashboard:
-
-- Dashboards -> TaskTracker -> TaskTracker Observability - Kubernetes
-
-## Prometheus test queries
-
-```promql
-up
-flask_http_request_total
-tasktracker_tasks_created_total
-tasktracker_users_created_total
+```text
+http://localhost:3000
+admin / admin
 ```
+
+## Explanation
+
+Prometheus collects two kinds of metrics. First, it scrapes application metrics from the task-service and user-service. Second, it scrapes Kubernetes state metrics from kube-state-metrics. Grafana displays only the most important indicators so the dashboard stays easy to understand during the presentation.

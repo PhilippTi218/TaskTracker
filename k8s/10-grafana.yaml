@@ -50,60 +50,199 @@ data:
   tasktracker-observability.json: |
     {
       "id": null,
-      "uid": "tasktracker-observability-k8s",
-      "title": "TaskTracker Observability - Kubernetes",
+      "uid": "tasktracker-observability-k8s-simple",
+      "title": "TaskTracker Observability - Kubernetes Simple",
       "timezone": "browser",
       "schemaVersion": 39,
-      "version": 1,
+      "version": 3,
       "refresh": "5s",
       "panels": [
         {
           "type": "stat",
           "title": "Services Up",
-          "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
-          "targets": [{"expr": "sum(up{job=~\"task-service|user-service\"})", "refId": "A"}]
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "expr": "sum(up{job=~\"task-service|user-service\"})",
+              "refId": "A"
+            }
+          ]
         },
         {
           "type": "timeseries",
           "title": "Request Rate by Service",
-          "gridPos": {"x": 6, "y": 0, "w": 9, "h": 8},
-          "targets": [{"expr": "sum by (job) (rate(flask_http_request_total[1m]))", "refId": "A"}]
+          "gridPos": {
+            "x": 6,
+            "y": 0,
+            "w": 9,
+            "h": 8
+          },
+          "targets": [
+            {
+              "expr": "sum by (job) (rate(flask_http_request_total[1m]))",
+              "legendFormat": "{{job}}",
+              "refId": "A"
+            }
+          ]
         },
         {
           "type": "timeseries",
           "title": "Error Rate by Service",
-          "gridPos": {"x": 15, "y": 0, "w": 9, "h": 8},
-          "targets": [{"expr": "sum by (job) (rate(flask_http_request_total{status=~\"5..\"}[1m]))", "refId": "A"}]
+          "gridPos": {
+            "x": 15,
+            "y": 0,
+            "w": 9,
+            "h": 8
+          },
+          "targets": [
+            {
+              "expr": "sum by (job) (rate(flask_http_request_total{status=~\"5..\"}[1m]))",
+              "legendFormat": "{{job}}",
+              "refId": "A"
+            }
+          ]
         },
         {
           "type": "timeseries",
           "title": "Average Response Time",
-          "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
-          "targets": [{"expr": "rate(flask_http_request_duration_seconds_sum[1m]) / rate(flask_http_request_duration_seconds_count[1m])", "refId": "A"}]
+          "gridPos": {
+            "x": 0,
+            "y": 8,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "expr": "rate(flask_http_request_duration_seconds_sum[1m]) / rate(flask_http_request_duration_seconds_count[1m])",
+              "legendFormat": "avg response time",
+              "refId": "A"
+            }
+          ]
         },
         {
           "type": "stat",
           "title": "Tasks Created",
-          "gridPos": {"x": 12, "y": 8, "w": 6, "h": 4},
-          "targets": [{"expr": "sum(tasktracker_tasks_created_total)", "refId": "A"}]
+          "gridPos": {
+            "x": 12,
+            "y": 8,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "expr": "sum(tasktracker_tasks_created_total)",
+              "refId": "A"
+            }
+          ]
         },
         {
           "type": "stat",
           "title": "Users Created",
-          "gridPos": {"x": 18, "y": 8, "w": 6, "h": 4},
-          "targets": [{"expr": "sum(tasktracker_users_created_total)", "refId": "A"}]
+          "gridPos": {
+            "x": 18,
+            "y": 8,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "expr": "sum(tasktracker_users_created_total)",
+              "refId": "A"
+            }
+          ]
         },
         {
           "type": "stat",
           "title": "Tasks Updated",
-          "gridPos": {"x": 12, "y": 12, "w": 6, "h": 4},
-          "targets": [{"expr": "sum(tasktracker_tasks_updated_total)", "refId": "A"}]
+          "gridPos": {
+            "x": 12,
+            "y": 12,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "expr": "sum(tasktracker_tasks_updated_total)",
+              "refId": "A"
+            }
+          ]
         },
         {
           "type": "stat",
           "title": "Tasks Deleted",
-          "gridPos": {"x": 18, "y": 12, "w": 6, "h": 4},
-          "targets": [{"expr": "sum(tasktracker_tasks_deleted_total)", "refId": "A"}]
+          "gridPos": {
+            "x": 18,
+            "y": 12,
+            "w": 6,
+            "h": 4
+          },
+          "targets": [
+            {
+              "expr": "sum(tasktracker_tasks_deleted_total)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "type": "bargauge",
+          "title": "Pod Status",
+          "gridPos": {
+            "x": 0,
+            "y": 16,
+            "w": 8,
+            "h": 6
+          },
+          "targets": [
+            {
+              "expr": "sum by (phase) (kube_pod_status_phase{namespace=\"task-tracker\"})",
+              "legendFormat": "{{phase}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Pod Restarts",
+          "gridPos": {
+            "x": 8,
+            "y": 16,
+            "w": 8,
+            "h": 6
+          },
+          "targets": [
+            {
+              "expr": "sum by (pod) (kube_pod_container_status_restarts_total{namespace=\"task-tracker\"})",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "HPA Current vs Desired Replicas",
+          "gridPos": {
+            "x": 16,
+            "y": 16,
+            "w": 8,
+            "h": 6
+          },
+          "targets": [
+            {
+              "expr": "kube_horizontalpodautoscaler_status_current_replicas{namespace=\"task-tracker\", horizontalpodautoscaler=\"task-service-hpa\"}",
+              "legendFormat": "current replicas",
+              "refId": "A"
+            },
+            {
+              "expr": "kube_horizontalpodautoscaler_status_desired_replicas{namespace=\"task-tracker\", horizontalpodautoscaler=\"task-service-hpa\"}",
+              "legendFormat": "desired replicas",
+              "refId": "B"
+            }
+          ]
         }
       ]
     }
