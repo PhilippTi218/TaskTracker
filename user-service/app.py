@@ -3,6 +3,8 @@ import os
 import psycopg
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from prometheus_client import Counter
+from prometheus_flask_exporter import PrometheusMetrics
 
 from database import connect
 from settings import MAX_USER_NAME_LENGTH
@@ -10,6 +12,16 @@ from settings import MAX_USER_NAME_LENGTH
 
 app = Flask(__name__)
 CORS(app)
+
+# Observability: /metrics endpoint for Prometheus
+metrics = PrometheusMetrics(app)
+metrics.info("user_service_info", "User service information", version="1.0.0")
+
+USERS_CREATED_TOTAL = Counter(
+    "tasktracker_users_created_total",
+    "Total number of users created",
+)
+
 
 
 @app.get("/health")
@@ -71,6 +83,7 @@ def create_user():
     except psycopg.errors.UniqueViolation:
         return {"error": "name already exists"}, 409
 
+    USERS_CREATED_TOTAL.inc()
     return jsonify(user), 201
 
 

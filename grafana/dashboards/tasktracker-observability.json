@@ -1,0 +1,67 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"expr": "sum by (job) (rate(flask_http_request_total[1m]))", "legendFormat": "{{job}}", "refId": "A"}],
+      "title": "Requests per second by service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "id": 2,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"expr": "sum by (job, status) (rate(flask_http_request_total{status=~\"4..|5..\"}[1m]))", "legendFormat": "{{job}} {{status}}", "refId": "A"}],
+      "title": "Error rate by service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 3,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [{"expr": "sum by (job) (rate(flask_http_request_duration_seconds_sum[1m])) / sum by (job) (rate(flask_http_request_duration_seconds_count[1m]))", "legendFormat": "{{job}}", "refId": "A"}],
+      "title": "Average response time by service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "id": 4,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single", "sort": "none"}},
+      "targets": [
+        {"expr": "tasktracker_tasks_created_total", "legendFormat": "tasks created", "refId": "A"},
+        {"expr": "tasktracker_tasks_updated_total", "legendFormat": "tasks updated", "refId": "B"},
+        {"expr": "tasktracker_tasks_deleted_total", "legendFormat": "tasks deleted", "refId": "C"},
+        {"expr": "tasktracker_users_created_total", "legendFormat": "users created", "refId": "D"}
+      ],
+      "title": "TaskTracker business metrics",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["tasktracker", "observability"],
+  "templating": {"list": []},
+  "time": {"from": "now-15m", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "TaskTracker Observability",
+  "uid": "tasktracker-observability",
+  "version": 1,
+  "weekStart": ""
+}

@@ -4,11 +4,31 @@ import time
 import psycopg
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from prometheus_client import Counter
+from prometheus_flask_exporter import PrometheusMetrics
 from psycopg.rows import dict_row
 
 
 app = Flask(__name__)
 CORS(app)
+
+# Observability: /metrics endpoint for Prometheus
+metrics = PrometheusMetrics(app)
+metrics.info("task_service_info", "Task service information", version="1.0.0")
+
+TASKS_CREATED_TOTAL = Counter(
+    "tasktracker_tasks_created_total",
+    "Total number of tasks created",
+)
+TASKS_UPDATED_TOTAL = Counter(
+    "tasktracker_tasks_updated_total",
+    "Total number of tasks updated",
+)
+TASKS_DELETED_TOTAL = Counter(
+    "tasktracker_tasks_deleted_total",
+    "Total number of tasks deleted",
+)
+
 
 
 def db_config():
@@ -142,6 +162,8 @@ def create_task():
             """,
             (title, description, user_id),
         ).fetchone()
+
+    TASKS_CREATED_TOTAL.inc()
     return jsonify(task), 201
 
 
@@ -184,6 +206,7 @@ def update_task(task_id):
     if task is None:
         return {"error": "task not found"}, 404
 
+    TASKS_UPDATED_TOTAL.inc()
     return jsonify(task)
 
 
@@ -195,6 +218,7 @@ def delete_task(task_id):
     if result.rowcount == 0:
         return {"error": "task not found"}, 404
 
+    TASKS_DELETED_TOTAL.inc()
     return "", 204
 
 
