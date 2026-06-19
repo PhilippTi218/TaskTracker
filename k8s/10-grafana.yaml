@@ -294,7 +294,9 @@ spec:
             - name: GF_SECURITY_ADMIN_USER
               value: admin
             - name: GF_SECURITY_ADMIN_PASSWORD
-              value: admin
+              value: password!1
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
           volumeMounts:
             - name: grafana-datasources
               mountPath: /etc/grafana/provisioning/datasources
