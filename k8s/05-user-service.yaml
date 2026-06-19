@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: task-tracker-user-service:latest
+          image: tasktracker-user-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
