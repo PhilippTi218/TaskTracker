@@ -122,7 +122,6 @@ This is intentionally not a full Kubernetes operations dashboard. The goal is to
 
 ## Kubernetes restart pods
 
-To keep the dashboard simple, the Kubernetes dashboard monitors only the most meaningful runtime metrics:
 
 ```bash
 kubectl rollout restart deployment/frontend -n task-tracker
@@ -137,7 +136,16 @@ kubectl rollout restart deployment/grafana -n task-tracker
 kubectl port-forward -n task-tracker svc/grafana 3000:3000
 ```
 
-This is intentionally not a full Kubernetes operations dashboard. The goal is to show the most important architectural idea: the system is observable at both application level and Kubernetes deployment level.
+---
+
+## Kubernetes stop pods
+
+```bash
+kubectl delete -f k8s/
+```
+```bash
+kubectl get pods -n task-tracker
+```
 
 ---
 
