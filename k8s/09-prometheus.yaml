@@ -1,4 +1,46 @@
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: task-tracker
+  labels:
+    app: prometheus
+    app.kubernetes.io/name: task-tracker
+    app.kubernetes.io/component: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-discovery
+  namespace: task-tracker
+  labels:
+    app: prometheus
+    app.kubernetes.io/name: task-tracker
+    app.kubernetes.io/component: monitoring
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "endpoints", "services"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-discovery
+  namespace: task-tracker
+  labels:
+    app: prometheus
+    app.kubernetes.io/name: task-tracker
+    app.kubernetes.io/component: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-discovery
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: task-tracker
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-config
@@ -17,15 +59,52 @@ data:
         static_configs:
           - targets: ["localhost:9090"]
 
+      # Kubernetes pod discovery is used here so Prometheus automatically
+      # follows scaling changes. If task-service has 2, 3, or 5 pods,
+      # Prometheus scrapes every ready pod separately.
       - job_name: task-service
         metrics_path: /metrics
-        static_configs:
-          - targets: ["task-service.task-tracker.svc.cluster.local:5000"]
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - task-tracker
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: keep
+            regex: task-service
+          - source_labels: [__meta_kubernetes_pod_ready]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_ip]
+            target_label: __address__
+            replacement: $1:5000
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
 
       - job_name: user-service
         metrics_path: /metrics
-        static_configs:
-          - targets: ["user-service.task-tracker.svc.cluster.local:5000"]
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - task-tracker
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: keep
+            regex: user-service
+          - source_labels: [__meta_kubernetes_pod_ready]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_ip]
+            target_label: __address__
+            replacement: $1:5000
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
 
       - job_name: kube-state-metrics
         metrics_path: /metrics
@@ -53,12 +132,15 @@ spec:
         app.kubernetes.io/name: task-tracker
         app.kubernetes.io/component: monitoring
     spec:
+      serviceAccountName: prometheus
       containers:
         - name: prometheus
-          image: prom/prometheus:v2.54.1
+          image: prom/prometheus:v2.53.0
           args:
             - --config.file=/etc/prometheus/prometheus.yml
             - --storage.tsdb.path=/prometheus
+            - --web.console.libraries=/etc/prometheus/console_libraries
+            - --web.console.templates=/etc/prometheus/consoles
             - --web.enable-lifecycle
           ports:
             - name: http
