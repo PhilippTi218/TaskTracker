@@ -6,11 +6,11 @@
 ## Team Presentation Structure
 This presentation is divided for **3 people**. Each person has a clear responsibility:
 
-| Person | Main Topic | Focus |
-|---|---|---|
-| Person 1 | Original System and Problem | Explain the project and why observability is needed |
-| Person 2 | Observability Architecture | Explain Prometheus, Grafana, metrics, and dashboards |
-| Person 3 | Deployment and Demo | Explain Docker Compose, Kubernetes, and show the live demo |
+| Person          | Main Topic | Focus |
+|-----------------|---|---|
+| Philipp Tichy   | Original System and Problem | Explain the project and why observability is needed |
+| Edwin Caballero | Observability Architecture | Explain Prometheus, Grafana, metrics, and dashboards |
+| Nadine Schmid   | Deployment and Demo | Explain Docker Compose, Kubernetes, and show the live demo |
 
 ---
 
