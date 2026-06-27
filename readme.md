@@ -4,11 +4,11 @@ GitHub Repository: https://github.com/PhilippTi218/TaskTracker
 
 ## Teammitglieder
 
-| Name | Schwerpunkt |
-|---|---|
-| Philipp Tichy | Ausgangssystem, Problemstellung und ursprüngliche Architektur |
-| Edwin Caballero | Observability-Architektur mit Prometheus, Grafana und Metriken |
-| Nadine Schmid | Kubernetes-Deployment, Demo und Laufzeit-Monitoring |
+| Name            | Schwerpunkte in der Präsentation                               |
+|-----------------|----------------------------------------------------------------|
+| Philipp Tichy   | Ausgangssystem, Problemstellung und ursprüngliche Architektur  |
+| Nadine Schmid   | Observability-Architektur mit Prometheus, Grafana und Metriken |
+| Edwin Caballero | Kubernetes-Deployment, Demo und Laufzeit-Monitoring            |
 
 ## Titel des Themas
 
