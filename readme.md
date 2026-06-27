@@ -20,7 +20,7 @@ Dafür wurden die Backend-Services um Prometheus-kompatible `/metrics`-Endpunkte
 
 ## Einfaches Komponentendiagramm
 
-![TaskTracker Infrastructure](Infrastructure.png)
+![TaskTracker Infrastructure](screenshots/Infrastructure.png)
 
 Kurz erklärt:
 
@@ -43,11 +43,7 @@ Screenshot der laufenden TaskTracker-Weboberfläche unter:
 http://localhost:8080
 ```
 
-Empfohlener Inhalt des Screenshots:
-
-- sichtbare TaskTracker-Oberfläche
-- mindestens ein angelegter User
-- mindestens ein angelegter Task
+![TaskTracker Frontend](screenshots/TaskTracker.png)
 
 ### 2. Prometheus Targets oder Query
 
@@ -57,10 +53,7 @@ Screenshot von Prometheus unter:
 http://localhost:9090
 ```
 
-Empfohlener Inhalt des Screenshots:
-
-- Query `up`
-- oder Prometheus Targets mit `task-service`, `user-service` und `kube-state-metrics`
+![Prometheus](screenshots/prometheus.png)
 
 ### 3. Grafana Dashboard
 
@@ -76,14 +69,7 @@ Login:
 admin / password!1
 ```
 
-Empfohlener Inhalt des Screenshots:
-
-- TaskTracker Dashboard
-- Request Rate
-- Error Rate
-- Response Time
-- Business Metrics
-- Pod Status oder HPA Current vs Desired Replicas
+![Grafana Dashboard](screenshots/grafana.png)
 
 ## Ergebnis
 
@@ -118,4 +104,3 @@ kube_pod_container_status_restarts_total
 kube_horizontalpodautoscaler_status_current_replicas
 kube_horizontalpodautoscaler_status_desired_replicas
 ```
-
